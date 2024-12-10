@@ -21,7 +21,7 @@
 
 	getLocationAddress: function(locationId) {
 	  if (locationId in locationApi.partyCache) return locationApi.partyCache[locationId];
-	  
+
 	  const loc = fetch(`https://hpe-rfb.itcs.hpe.com/resources/rs/custom/php/nor/location/location-prod.php?id=${locationId}`, {
 		headers: {
 		  "Content-Type": "application/json"
@@ -3347,27 +3347,11 @@
 	},
 	structure: [
 	  {
-	  //header: "Form056",
-	  header: "Address",
-	  filter: {
-		logic: "and",
-		filters: [{
-		  field: "Config_SoldToDetails",
-		  operator: "neq",
-		  value: "Y"
+		//header: "Form056",
+		header: "Address",
+		filter: (ds) => {
+		  return ds.Config_SoldToDetails != "Y" && ds.xrefFail == "No" && !["HK", "MO"].includes(ds.CountryCode);
 		},
-				  {
-					field: "xrefFail",
-					operator: "eq",
-					value: "No"
-				  },
-				  {
-					field: "CountryCode",
-					operator: "nin",
-					value: ["HK", "MO"]
-				  },
-				 ]
-	  },
 		group: [
 		  [
 			{
@@ -3462,24 +3446,8 @@
 	  {
 		//header: "Form056",
 		header: "Address",
-		filter: {
-		  logic: "and",
-		  filters: [{
-			field: "Config_SoldToDetails",
-			operator: "neq",
-			value: "Y"
-		  },
-					{
-					  field: "xrefFail",
-					  operator: "eq",
-					  value: "No"
-					},
-					{
-					  field: "CountryCode",
-					  operator: "in",
-					  value: ["HK", "MO"]
-					},
-				   ]
+		filter: (ds) => {
+		  return ds.Config_SoldToDetails != "Y" && ds.xrefFail == "No" && ["HK", "MO"].includes(ds.CountryCode)
 		},
 		group: [
 		  [{
@@ -3571,24 +3539,8 @@
 	  },
 	  {
 		header: "",
-		filter: {
-		  logic: "and",
-		  filters: [
-			{
-			  field: "Config_SoldToDetails",
-			  operator: "neq",
-			  value: "Y"
-			}, 
-			{
-			  field: "xrefFail",
-			  operator: "eq",
-			  value: "No"
-			},
-			{
-			  field: "SoldTo_Address_Country",
-			  operator: "in",
-			  value: ["Argentina", "Brazil", "Chile", "Colombia", "Mexico", "Peru", "Puerto Rico"]
-			}]
+		filter: (ds) => {
+		  return ds.Config_SoldToDetails != "Y" && ds.xrefFail == "No" && ["Argentina", "Brazil", "Chile", "Colombia", "Mexico", "Peru", "Puerto Rico"].includes(ds.SoldTo_Address_Country)
 		},
 		group: [
 		  [{
@@ -3604,24 +3556,8 @@
 	  },
 	  {
 		header: "",
-		filter: {
-		  logic: "and",
-		  filters: [
-			{
-			  field: "Config_SoldToDetails",
-			  operator: "neq",
-			  value: "Y"
-			}, 
-			{
-			  field: "xrefFail",
-			  operator: "eq",
-			  value: "No"
-			},
-			{
-			  field: "SoldTo_Address_Country",
-			  operator: "nin",
-			  value: ["Argentina", "Brazil", "Chile", "Colombia", "Mexico", "Peru", "Puerto Rico"]
-			}]
+		filter: (ds) => {
+		  return ds.Config_SoldToDetails != "Y" && ds.xrefFail == "No" && !["Argentina", "Brazil", "Chile", "Colombia", "Mexico", "Peru", "Puerto Rico"].includes(ds.SoldTo_Address_Country)
 		},
 		group: [
 		  [{
@@ -3639,19 +3575,8 @@
 	  {
 		//header: "Form056",
 		header: "Address",
-		filter: {
-		  logic: "and",
-		  filters: [{
-			field: "Config_SoldToDetails",
-			operator: "neq",
-			value: "Y"
-		  },
-					{
-					  field: "xrefFail",
-					  operator: "eq",
-					  value: "Yes"
-					}
-				   ]
+		filter: (ds) => {
+		  return ds.Config_SoldToDetails != "Y" && ds.xrefFail == "Yes"
 		},
 		group: [
 		  [{
@@ -3667,11 +3592,7 @@
 	  },
 	  {
 		header: "Contact",
-		filter: {
-		  field: "Config_SoldToDetails",
-		  operator: "neq",
-		  value: "Y"
-		},
+		filter: (ds) => ds.Config_SoldToDetails != "Y",
 		group: [
 		  [{
 			label: "FirstName",
@@ -3715,9 +3636,7 @@
 			 data: "SoldTo_Contact_Country",
 			 required: true,
 			 type: "select",
-			 values: function() {
-			   return reference.countriesArray
-			 }
+			 values: () => reference.countriesArray
 		   }
 		  ]
 		]
@@ -3946,7 +3865,7 @@
 					 {
 					   label: "Surname",
 					   data: "Payer_Contact_LastName",
-					   required: false,
+					   required: () => !isContactSectionEmpty("Payer"),
 					   type: "text",
 					   //placeholder: "Form099",
 					   validation: ["kpDefault", "minLen|1", "maxLen|60"],
@@ -3964,7 +3883,7 @@
 					 {
 					   label: "Email",
 					   data: "Payer_Contact_Email",
-					   required: false,
+					   required: () => !isContactSectionEmpty("Payer"),
 					   type: "text",
 					   //placeholder: "Form100",
 					   validation: ["isEmail", "maxLen|96"],
@@ -3973,7 +3892,7 @@
 					 {
 					   label: "CountryOfResidence",
 					   data: "Payer_Contact_Country",
-					   required: false,
+					   required: () => !isContactSectionEmpty("Payer"),
 					   type: "select",
 					   values: function() {
 						 return reference.countriesArray
@@ -4129,7 +4048,7 @@
 					 {
 					   label: "Surname",
 					   data: "BillTo_Contact_LastName",
-					   required: false,
+					   required: () => !isContactSectionEmpty("BillTo"),
 					   type: "text",
 					   //placeholder: "Form112",
 					   validation: ["kpDefault", "minLen|1", "maxLen|60"],
@@ -4147,7 +4066,7 @@
 					 {
 					   label: "Email",
 					   data: "BillTo_Contact_Email",
-					   required: false,
+					   required: () => !isContactSectionEmpty("BillTo"),
 					   type: "text",
 					   //placeholder: "Form113",
 					   validation: ["isEmail", "maxLen|96"],
@@ -4156,7 +4075,7 @@
 					 {
 					   label: "CountryOfResidence",
 					   data: "BillTo_Contact_Country",
-					   required: false,
+					   required: () => !isContactSectionEmpty("BillTo"),
 					   type: "select",
 					   values: function() {
 						 return reference.countriesArray
@@ -4607,7 +4526,7 @@
 				{
 				  header: "Contact",
 				  filter: () => {
-					return config.dataset.Config_ShipToDetails_Contact != "Y" && config.dataset.SoldTo_Address_Country != "Korea (Rep.)" && config.dataset.CountryCode != "CN";
+					return config.dataset.Config_ShipToDetails_Contact != "Y"
 				  },
 				  group: [
 					[{
@@ -4623,7 +4542,7 @@
 					 {
 					   label: "Surname",
 					   data: "ShipTo_Contact_LastName",
-					   required: false,
+					   required: () => ["CN", "TW"].includes(config.dataset.CountryCode) || !isContactSectionEmpty("ShipTo"), // config.dataset.SoldTo_Address_Country != "Korea (Rep.)"
 					   type: "text",
 					   //placeholder: "Form125",
 					   validation: ["kpDefault", "minLen|1", "maxLen|60"],
@@ -4632,7 +4551,7 @@
 					 {
 					   label: "Telephone",
 					   data: "ShipTo_Contact_Phone",
-					   required: false,
+					   required: () => !["CN", "TW"].includes(config.dataset.CountryCode) && !isContactSectionEmpty("ShipTo"), // config.dataset.SoldTo_Address_Country != "Korea (Rep.)"
 					   type: "text",
 					   //placeholder: "1-888-666-5555",
 					   validation: ["typePhone", "minLen|8", "maxLen|18"],
@@ -4641,7 +4560,7 @@
 					 {
 					   label: "Email",
 					   data: "ShipTo_Contact_Email",
-					   required: false,
+					   required: () => ["CN", "TW"].includes(config.dataset.CountryCode) || !isContactSectionEmpty("ShipTo"), // config.dataset.SoldTo_Address_Country != "Korea (Rep.)"
 					   type: "text",
 					   //placeholder: "Form218",
 					   validation: ["isEmail", "maxLen|96"],
@@ -4650,11 +4569,9 @@
 					 {
 					   label: "CountryOfResidence",
 					   data: "ShipTo_Contact_Country",
-					   required: false,
+					   required: () => ["CN", "TW"].includes(config.dataset.CountryCode) || !isContactSectionEmpty("ShipTo"), // config.dataset.SoldTo_Address_Country != "Korea (Rep.)"
 					   type: "select",
-					   values: function() {
-						 return reference.countriesArray
-					   }
+					   values: () => reference.countriesArray
 					 },
 					 {
 					   label: "CopyShipTo2EndCx",
@@ -4664,70 +4581,6 @@
 					   value: "N",
 					   values: ["N", "Y"],
 					   options: ["No", "Yes"],
-					 }
-					]
-				  ]
-				},
-				{
-				  header: "Contact",
-				  filter: () => {
-					return config.dataset.Config_ShipToDetails_Contact != "Y" && (config.dataset.SoldTo_Address_Country == "Korea (Rep.)" || config.dataset.CountryCode == "CN");
-				  },
-				  group: [
-					[{
-					  label: "FirstName",
-					  data: "ShipTo_Contact_FirstName",
-					  required: false,
-					  type: "text",
-					  //placeholder: "Form124",
-					  validation: ["kpDefault", "minLen|1"],
-					  typing: "kpDefault",
-					  class: "review-contact-firstname",
-					},
-					 {
-					   label: "Surname",
-					   data: "ShipTo_Contact_LastName",
-					   required: true,
-					   type: "text",
-					   //placeholder: "Form125",
-					   validation: ["kpDefault", "minLen|1", "maxLen|60"],
-					   typing: "kpDefault"
-					 },
-					 {
-					   label: "Telephone",
-					   data: "ShipTo_Contact_Phone",
-					   required: true,
-					   type: "text",
-					   //placeholder: "1-888-666-5555",
-					   validation: ["typePhone", "minLen|8", "maxLen|18"],
-					   typing: "typePhone"
-					 },
-					 {
-					   label: "Email",
-					   data: "ShipTo_Contact_Email",
-					   required: true,
-					   type: "text",
-					   //placeholder: "Form218",
-					   validation: ["isEmail", "maxLen|96"],
-					   typing: "typeEmail"
-					 },
-					 {
-					   label: "CountryOfResidence",
-					   data: "ShipTo_Contact_Country",
-					   required: false,
-					   type: "select",
-					   values: function() {
-						 return reference.countriesArray
-					   }
-					 },
-					 {
-					   label: "CopyShipTo2EndCx",
-					   data: "toggleCopyShipto2Endx",
-					   required: false,
-					   type: "toggle",
-					   value: "N",
-					   values: ["N", "Y"],
-					   options: ["No", "Yes"]
 					 }
 					]
 				  ]
@@ -8372,11 +8225,6 @@
 	}
   }
 
-  function getShipToContactMandatory(ISO2, recordsArray) {
-	const result = recordsArray.find(record => record.ISO2 === ISO2);
-	return result ? result.ShipToContactMandatory === 'Y' : null;
-  }
-
   function isStateOrPostalRequired(dataset, countryField, streetField, referenceData, requiredKey) {
 	const country = dataset[countryField];
 	const street = dataset[streetField];
@@ -8397,32 +8245,6 @@
 	    }
 	  }
     }
-  }
-
-  const initializeContactFields = function (fieldPrefix){
-	if (getShipToContactMandatory(config.dataset.CountryCode, reference.countriesData) && fieldPrefix === 'ShipTo') {
-	  const requiredFields = ["ShipTo_Contact_LastName", "ShipTo_Contact_Phone", "ShipTo_Contact_Email"];
-
-	  visitItems((item) => {
-		if (config.sectionContactFields[fieldPrefix].includes(item.data)) {
-		  item.required = requiredFields.includes(item.data);
-		} 
-	  });
-	} else {
-	  const allFieldsEmpty = config.sectionContactFields[fieldPrefix].every(field => {
-		if (field === `${fieldPrefix}_Contact_Country`) return true;
-		let value = global.data.userPreferences && global.data.userPreferences[config.dataset.PartyId] && global.data.userPreferences[config.dataset.PartyId][field];
-		return !value || value === config.pages[config.page].selectone;
-	  });
-
-	  const required = !allFieldsEmpty;
-
-	  visitItems((item) => {
-		if (config.sectionContactFields[fieldPrefix].includes(item.data)) {
-		  item.required = required && item.data !== `${fieldPrefix}_Contact_FirstName`;
-		} 
-	  });
-	};
   }
 
   const loadPreferences = function() {
@@ -8570,6 +8392,13 @@
 	  });
 	  $('[data-name="toggleCopyShipto2Endx"]').parents('label').css('paddingRight', '0px');
 	}
+  }
+
+  function isContactSectionEmpty(section, ignoreCountry) {
+	const reviewDs = config.reviewDataset && Object.keys(config.reviewDataset).length;
+	const ds = reviewDs ? config.reviewDataset : config.dataset;
+	const fields = ignoreCountry ? config.sectionContactFields[section].filter(f => !f.endsWith("_Country")) : config.sectionContactFields[section];
+	return !fields.some(field => !!ds[field]);
   }
 
   const config = {
@@ -10187,10 +10016,6 @@
 		}
 	  }
 
-	  ['Payer', 'BillTo', 'ShipTo'].forEach(fieldPrefix => {
-		initializeContactFields(fieldPrefix);
-	  });
-
 	  config.dataset.aggrVal = "0";
 	  if (global.data.brt.pas.length > 0)
 		config.dataset.aggrVal = "1";
@@ -11295,11 +11120,6 @@
 	  });
 
 	  // ShipTo
-	  if (config.dataset.ShipTo_Address_Country && !config.dataset.ShipTo_Contact_Country) {
-		$(`[data-name="ShipTo_Contact_Country"]`).val(config.dataset.ShipTo_Address_Country);
-		config.dataset.ShipTo_Contact_Country = config.dataset.ShipTo_Address_Country;
-		if (config.reviewDataset && Object.keys(config.reviewDataset).length) config.reviewDataset.ShipTo_Contact_Country = config.dataset.ShipTo_Address_Country;
-	  }
 	  $(`[data-name="ShipTo_PartyId"]`).change(function() {
 		$(`[data-name="ShipTo_Contact_Country"]`).val(config.dataset.ShipTo_Address_Country);
 		config.dataset.ShipTo_Contact_Country = config.dataset.ShipTo_Address_Country;
@@ -12353,17 +12173,19 @@
 			}
 		  } else {
 			for (let key in contactAssociations) {
+			  const fieldName = `${section}_${contactAssociations[key]}`;
 			  if (key === 'Country') {
 				const country = reference.countriesData.find((item) => item.ISO2 === quoteHelper.quote.quoteHeader[quoteSection].Contact[key]);
-				config.dataset[`${section}_${contactAssociations[key]}`] = country ? country.Name : null;
+				config.dataset[fieldName] = country ? country.Name : null;
 			  } else {
-				config.dataset[`${section}_${contactAssociations[key]}`] = quoteHelper.quote.quoteHeader[quoteSection].Contact[key];
+				config.dataset[fieldName] = quoteHelper.quote.quoteHeader[quoteSection].Contact[key];
 			  }
 			}
 		  }
-
-		  // “TradeStyleName” to “Company name” wherever available if not use the name field 
-		  //config.dataset[`${section}_CompanyName`] = (quoteHelper.quote.quoteHeader[quoteSection].Address && quoteHelper.quote.quoteHeader[quoteSection].Address.TradeStyleName) || quoteHelper.quote.quoteHeader[quoteSection].Company.Name;
+		  // If the contact part has LastName or Email and no Country, then populate Contact Country from Address Country
+		  if ((config.dataset[`${section}_Contact_FirstName`] || config.dataset[`${section}_Contact_Email`]) && !config.dataset[`${section}_Contact_Country`]) {
+			config.dataset[`${section}_Contact_Country`] = config.dataset[`${section}_Address_Country`];
+		  }
 		}
 
 		const initDataset = async function(section, quoteSection) {
@@ -14418,7 +14240,11 @@
 			}
 			if (fieldName === `${fieldPrefix}_Address_Country`) {
 			  config.dataset[`${fieldPrefix}_Address_Country`] = e.target.value;
-			  if (rdsExist) config.reviewDataset[`${fieldPrefix}_Address_Country`] = e.target.value;
+			  config.dataset[`${fieldPrefix}_Contact_Country`] = e.target.value;
+			  if (rdsExist) {
+				config.reviewDataset[`${fieldPrefix}_Address_Country`] = e.target.value;
+				config.reviewDataset[`${fieldPrefix}_Contact_Country`] = e.target.value;
+			  }
 			  nbsf.init(config, config.page);
 			}
 
@@ -14432,61 +14258,29 @@
 			if (e.target.getAttribute("data-name") == "PartyId") partyIdChanged();
 		  });
 
-		  // Change "required" property on Email, First, Last Name, Phone and Country
+		  // Erase or fill Contact Country when all other Contact fields are empty or non-empty
 		  document.querySelector('div[tab-id="oob"]').addEventListener("change", (e) => {
 			const fieldName = e.target.getAttribute("data-name");
-			const contactFieldPattern = /^(Payer|BillTo|ShipTo)_Contact_(Email|Country|FirstName|LastName|Phone)$/;
+			const contactFieldPattern = /^(SoldTo|Payer|BillTo|ShipTo|EndCx|Reseller)_Contact_(Email|Country|FirstName|LastName|Phone)$/;
 			if (!contactFieldPattern.test(fieldName)) return;
 
 			const fieldPrefix = fieldName.split("_")[0];
-			if (getShipToContactMandatory(config.dataset.CountryCode, reference.countriesData) && fieldPrefix === "ShipTo") {
-			  const requiredFields = ["ShipTo_Contact_LastName", "ShipTo_Contact_Phone", "ShipTo_Contact_Email"];
+			const rdsExist = config.reviewDataset && Object.keys(config.reviewDataset).length;
+			const contactCountryField = fieldPrefix + "_Contact_Country";
+			config.dataset[fieldName] = e.target.value;
+			if (rdsExist) config.reviewDataset[fieldName] = e.target.value;
 
-			  visitItems((item) => {
-				if (config.sectionContactFields[fieldPrefix].includes(item.data)) {
-				  item.required = requiredFields.includes(item.data);
-				} 
-			  });
+			if (isContactSectionEmpty(fieldPrefix, true)) {
+			  $("[data-name='" + contactCountryField + "']").val("");
+			  config.dataset[contactCountryField] = null;
+			  if (rdsExist) config.reviewDataset[contactCountryField] = null;
 			} else {
-			  const currVal = e.target.value;
-			  let required = false;
-
-			  const prevCountry = config.dataset[fieldPrefix + "_Contact_Country"];
-			  config.dataset[fieldName] = currVal;
-			  let prevRequired = null;
-
-			  let allFieldsEmpty = config.sectionContactFields[fieldPrefix].every(field => {
-				if (field === `${fieldPrefix}_Contact_Country`) return true;
-				let value = config.dataset[field];
-				return value === '' || value === null || value === config.pages[config.page].selectone;
-			  });
-
-			  required = !allFieldsEmpty;
-
-			  if (!required) {
-				config.dataset[fieldPrefix + "_Contact_Country"] = null;
-				if (config.reviewDataset && Object.keys(config.reviewDataset).length) config.reviewDataset[fieldPrefix + "_Contact_Country"] = null;
-			  }
-			  visitItems((item) => {
-				if (config.sectionContactFields[fieldPrefix].includes(item.data)) {
-				  if (prevRequired === null) prevRequired = item.required;
-				  item.required = required && item.data !== `${fieldPrefix}_Contact_FirstName`;
-				}
-			  });
-
-			  if (prevRequired !== required) {
-				// Fill Contact Country from Address Country if it was empty and became mandatory
-				if (required) {
-				  const country = config.dataset[fieldPrefix + "_Address_Country"];
-				  if (!prevCountry || prevCountry == config.pages[config.page].selectone) {
-					config.dataset[fieldPrefix + "_Contact_Country"] = country;
-					if (config.reviewDataset && Object.keys(config.reviewDataset).length) config.reviewDataset[fieldPrefix + "_Contact_Country"] = country;
-				  }
-				}
-				// for Review pages nbsf.init(config, config.page) is executed after this event
-				if (!config.pages[config.page].review) nbsf.init(config, config.page);
-			  }
+			  const addrCountryField = fieldPrefix + "_Address_Country";
+			  const addrCountry = rdsExist ? config.reviewDataset[addrCountryField] : config.dataset[addrCountryField];
+			  config.dataset[contactCountryField] = addrCountry;
+			  if (rdsExist) config.reviewDataset[contactCountryField] = addrCountry;
 			}
+			if (!config.pages[config.page].review) nbsf.init(config, config.page);
 		  }, true);
 		});
 	  });
@@ -15979,8 +15773,18 @@
 	resetPredefinedProps: function(rec) {
 	  Object.entries(multiValues.data).forEach(([field, values]) => {
 		const recVal = rec[field];
-		rec[field + "_Predefined"] = values.indexOf(recVal) >= 0 ? recVal : multiValues.OTHER;
-		if (!recVal) rec[field + "_Predefined"] = null;
+		const predefined = field + "_Predefined";
+		if (values.indexOf(recVal) >= 0) {
+		  rec[predefined] = recVal;
+		} else {
+		  rec[predefined] = recVal ? multiValues.OTHER : null;
+		  // For Party IDs the option OTHER is also selected when something Address Section is filled
+		  if (field.endsWith("_PartyId") && !recVal) {
+			const section = field.split("_")[0];
+			const isFilled = config.sectionAddressFields[section] && config.sectionAddressFields[section].some(fld => !!rec[fld]);
+			if (isFilled) rec[predefined] = multiValues.OTHER;
+		  }
+		}
 	  });
 	},
 
