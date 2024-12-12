@@ -1,5 +1,13 @@
 <!-- VERSION ROUTING-->
 <script>
+  let singleRel = {};
+  if ("[SSOData.Email]".indexOf('@hpe.com') < 0){
+	singleRel = JSON.parse(`[SSOData.MultipleCompanyRelationship]`).filter(item => item.businessRelationshipCountryName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryName && item.businessRelationshipCountryCode === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryCode && item.businessRelationship.mdcpPartnerBusinessRelationshipTypeName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).partnerType)[0]
+  }
+  
+  function getCountryData(countryCode, data) {
+	return data.find(item => item.ISO2 === countryCode);
+  }
   function countryRouting(currCountryCode, usePilot = false) {
 	const isPilot = false; // True means this instance of NOR is for special list of countries
 	const countries = [
@@ -85,7 +93,7 @@
 		}
 	  });
 	  
-	  locationApi.partyCache[partyId] = loc;
+	  locationApi.partyCache[locationId] = loc;
 	  return loc;
 	},
 	
@@ -658,8 +666,10 @@
 	  }
 	},
 	sso: function() {
-	  global.data.brt.code = JSON.parse(String.raw`[SSOData.PreferredBusinessRelationship]`).businessRelationshipTypeCode;
-	  global.data.brt.name = JSON.parse(String.raw`[SSOData.PreferredBusinessRelationship]`).businessRelationshipTypeName;
+	  //global.data.brt.code = JSON.parse(String.raw`[SSOData.PreferredBusinessRelationship]`).businessRelationshipTypeCode;
+	  //global.data.brt.name = JSON.parse(String.raw`[SSOData.PreferredBusinessRelationship]`).businessRelationshipTypeName;
+	  global.data.brt.code = singleRel.businessRelationship.businessRelationshipTypeCode;
+	  global.data.brt.name = singleRel.businessRelationship.mdcpPartnerBusinessRelationshipTypeName;
 	  //global.data.brt.channel = [];
 	  // SETTING THE CHANNEL IS IMPORTANT
 	  // IT NEEDS TO BE AVAILABLE FOR THE iCERTIS CALL
@@ -672,15 +682,15 @@
 	  global.data.brt.pas = [];
 	  global.data.brt.partyId = [];
 
-	  global.data.company.party = "[SSOData.PartyId]";
-	  global.data.company.country = "[SSOData.CountryEntityId]";
-	  global.data.company.global = "[SSOData.GlobalEntityId]";
-	  global.data.company.brt = JSON.parse(String.raw`[SSOData.PreferredBusinessRelationship]`).businessRelationshipTypeName;
-	  global.data.company.PreferredBusinessRelationship = JSON.parse(String.raw`[SSOData.PreferredBusinessRelationship]`);
-	  global.data.company.name = "[SSOData.PartnerName]";
+	  global.data.company.party = singleRel.partyData[0].partyID;
+	  global.data.company.country = singleRel.countryEntityID;
+	  global.data.company.global = singleRel.globalEntityID;
+	  global.data.company.brt = singleRel.businessRelationship.mdcpPartnerBusinessRelationshipTypeName;
+	  global.data.company.PreferredBusinessRelationship = singleRel.businessRelationship.mdcpPartnerBusinessRelationshipTypeName;
+	  global.data.company.name = singleRel.partyData[0].partyname;
 
 	  global.data.geo.name = "[SSOData.PhysCountry]"; //CFI
-	  global.data.geo.code = "[SSOData.CountryCode]"; //CFI
+	  global.data.geo.code = singleRel.partyData[0].partyaddress.country; //CFI
 
 	  //global.data.geo.name = "India";
 	  //global.data.geo.code = "IN";
@@ -692,6 +702,7 @@
 	  global.data.user.locale = "[SSOData.Locale]";
 	  global.data.user.language = "[SSOData.PreferredLanguageCode]";
 	  global.data.user.planguage = "[SSOData.Language]";
+	  global.data.sim = singleRel.businessRelationship.sellIntoMkt.map(item => item.worldRegionCode);
 	},
 	sor: function(cb) {
 	  profile.get({
@@ -699,7 +710,8 @@
 		relationship: true,
 		company: true,
 		geography: true,
-		business: true
+		business: true,
+		brga: singleRel.businessRelationship.businessRelationshipGroupAssignmnetId
 	  }, function(d) {
 		if (d.success) {
 		  global.data.company.country = d.business.GroupId;
@@ -781,15 +793,15 @@
 	global.data.brt.pas = [];
 	global.data.brt.partyId = [];
 
-	global.data.company.party = "[SSOData.PartyId]";
-	global.data.company.country = "[SSOData.CountryEntityId]";
-	global.data.company.global = "[SSOData.GlobalEntityId]";
-	global.data.company.brt = JSON.parse(String.raw`[SSOData.PreferredBusinessRelationship]`).businessRelationshipTypeName;
-	global.data.company.PreferredBusinessRelationship = JSON.parse(String.raw`[SSOData.PreferredBusinessRelationship]`);
-	global.data.company.name = "[SSOData.PartnerName]";
+	global.data.company.party = singleRel.partyData[0].partyID;
+	global.data.company.country = singleRel.countryEntityID;
+	global.data.company.global = singleRel.globalEntityID;
+	global.data.company.brt = singleRel.businessRelationship.mdcpPartnerBusinessRelationshipTypeName;
+	global.data.company.PreferredBusinessRelationship = singleRel.businessRelationship.mdcpPartnerBusinessRelationshipTypeName;
+	global.data.company.name = singleRel.partyData[0].partyname;
 
 	global.data.geo.name = "[SSOData.PhysCountry]"; //CFI
-	global.data.geo.code = "[SSOData.CountryCode]"; //CFI
+	global.data.geo.code = singleRel.partyData[0].partyaddress.country; //CFI
 
 	//global.data.geo.name = "India";
 	//global.data.geo.code = "IN";
@@ -801,6 +813,7 @@
 	global.data.user.locale = "[SSOData.Locale]";
 	global.data.user.language = "[SSOData.PreferredLanguageCode]";
 	global.data.user.planguage = "[SSOData.Language]";
+	global.data.sim = singleRel.businessRelationship.sellIntoMkt.map(item => item.worldRegionCode);
 	
 	if (!global.data.company.party)
 	  global.error = 'FormNoParty';
@@ -810,7 +823,8 @@
 	  relationship: true,
 	  company: true,
 	  geography: true,
-	  business: true
+	  business: true,
+		brga: singleRel.businessRelationship.businessRelationshipGroupAssignmnetId
 	},
 				function(d) {
 	  if (d.success) {
@@ -871,6 +885,7 @@
 		global.data.brt.code = brtCode[0].code;
 		global.ready = true;
 	  }
+		global.ready = true;
 	});
   }
 </script>
@@ -896,6 +911,8 @@
 	  }, function(d) {
 		if (typeof(d) === 'object' && d.Success) {
 		  reference.countriesData = d.Data;
+		  if ("[SSOData.Email]".indexOf('@hpe.com') < 0)
+		  	global.data.geo.name = getCountryData(singleRel.partyData[0].partyaddress.country, reference.countriesData).Name
 		  for (let i = 0; i < reference.countriesData.length; i++) {
 			if (reference.countriesData[i].Name == global.data.geo.name) {
 			  global.data.geo.geography = reference.countriesData[i].GEO;
@@ -1211,6 +1228,14 @@
 					  decimals: 4,
 					  placeholder: "",
 					  validation: ["isEmail", "minLen|6", "maxLen|256", "noBlanksv2"],
+					  typing: "kpDefault"
+					},
+					{
+					  label: "BRGA",
+					  data: "OnBehalf_BRGA",
+					  required: false,
+					  type: "text",
+					  validation: ["kpDefault", "minLen|2", "maxLen|10", "noBlanksv2"],
 					  typing: "kpDefault"
 					}],
 				  ]
@@ -8852,6 +8877,7 @@
 				
 				// new 
 				let brts = view.filter(item => global.data.brts.find(brt => brt.name === item.BRT));
+				console.log('brts', brts)
 				const brts_names = brts.map(item => item.BRT);
 				brts = global.data.brts.filter(item => brts_names.includes(item.name));
 				let channels = [];
@@ -8943,16 +8969,19 @@
 				  loadPreferences().then(() => {
 					crud.q.stop(function() {
 					  hpe.data.xref(global.data.company.party, function(d) {
-						global.data.company.party = d.party[0].currentPartyID || d.party[0].submittedPartyID;
-						reference.xref = d;
-						partyIdChanged();
-						config.locale = global.data.user.locale;
-						config.dom = document.querySelector('div[tab-id="oob"]');
-						nbsf.init(config, config.page + 1);
-						nbsf.init(config, config.page);
-						mo.fn.events.closeAll();
-						mo.fn.overlay.hide();
-						countryRouting(global.data.geo.code);
+						if(d){
+						  console.log('dddd', d)
+						  global.data.company.party = d.party[0].currentPartyID || d.party[0].submittedPartyID;
+						  reference.xref = d;
+						  partyIdChanged();
+						  config.locale = global.data.user.locale;
+						  config.dom = document.querySelector('div[tab-id="oob"]');
+						  nbsf.init(config, config.page + 1);
+						  nbsf.init(config, config.page);
+						  mo.fn.events.closeAll();
+						  mo.fn.overlay.hide();
+						  countryRouting(global.data.geo.code);
+						}
 					  });
 					});
 				  })
@@ -8975,7 +9004,8 @@
 			relationship: true,
 			company: true,
 			geography: true,
-			business: true
+			business: true,
+			brga: document.querySelector('input[data-name="OnBehalf_BRGA"]').value
 		  }, function(d) {
 			if (d.success) {
 			  global.data.company.country = d.business.GroupId;
@@ -9108,16 +9138,21 @@
 				loadPreferences().then(() => {
 				  crud.q.stop(function() {
 					hpe.data.xref(global.data.company.party, function(d) {
-					  global.data.company.party = d.party[0].currentPartyID || d.party[0].submittedPartyID;
-					  reference.xref = d;
-					  partyIdChanged();
-					  config.locale = global.data.user.locale;
-					  config.dom = document.querySelector('div[tab-id="oob"]');
-					  nbsf.init(config, config.page + 1);
-					  nbsf.init(config, config.page);
-					  mo.fn.events.closeAll();
-					  mo.fn.overlay.hide();
-					  countryRouting(global.data.geo.code);
+					  if(d){
+						console.log('dddd', d)
+						global.data.company.party = d.party[0].currentPartyID || d.party[0].submittedPartyID;
+						reference.xref = d;
+						partyIdChanged();
+						config.locale = global.data.user.locale;
+						config.dom = document.querySelector('div[tab-id="oob"]');
+						nbsf.init(config, config.page + 1);
+						nbsf.init(config, config.page);
+						mo.fn.events.closeAll();
+						mo.fn.overlay.hide();
+						console.log(global.data.geo.code); // Check if this is defined and valid
+console.log(typeof countryRouting); // Should log 'function' if defined
+						countryRouting(global.data.geo.code);
+					  }
 					});
 				  });
 				});
