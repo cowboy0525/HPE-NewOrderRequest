@@ -33,7 +33,7 @@
 		  return Promise.reject(locationResp);
 		}
 	  });
-	  
+
 	  locationApi.partyCache[locationId] = loc;
 	  return loc;
 	},
@@ -8291,8 +8291,8 @@
 			});
 			global.data.brt.partyId.forEach((pid) => {
 			  if (!prefs[pid]) prefs[pid] = {};
-			  if (!prefs[pid].Payment_Terms) prefs[pid].Payment_Terms = "NT30 - Within 30 days due net";
 			});
+			// Convert values PREF-NN to arrays
 			const multiKeyRe = /^.+-\d+$/
 			Object.keys(prefs).forEach((prefPartyId) => {
 			  const partyPrefs = prefs[prefPartyId];
@@ -8308,12 +8308,23 @@
 				delete partyPrefs[key];
 			  });
 			});
-			// Force some Party ID preferences to be arrays
+			// Handle Preferences after transforming multiple values
 			Object.keys(prefs).forEach((prefPartyId) => {
+			  // Force some Party ID preferences to be arrays
 			  const partyPrefs = prefs[prefPartyId];
 			  ["ShipTo_PartyId", "BillTo_PartyId"].filter(key => !!partyPrefs[key]).forEach((key) => {
 				if (!Array.isArray(partyPrefs[key])) partyPrefs[key] = [partyPrefs[key]];
-			  })
+			  });
+			  // Ensure that Payment Terms is always present
+			  const defaultPT = "NT30 - Within 30 days due net";
+			  const paymentTerms = partyPrefs.Payment_Terms;
+			  if (!paymentTerms) {
+				partyPrefs.Payment_Terms = defaultPT;
+			  } else if (Array.isArray(paymentTerms)) {
+				if (!paymentTerms.some(v => v == defaultPT)) paymentTerms.push(defaultPT);
+			  } else if (paymentTerms != defaultPT) {
+				partyPrefs.Payment_Terms = [paymentTerms, defaultPT];
+			  }
 			});
 			global.data.userPreferences = prefs;
 			resolve();
