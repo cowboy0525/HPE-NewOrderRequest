@@ -11072,34 +11072,34 @@
 	  console.log('page12');
 	},
 	page13: function() {
-        console.log('page13');
-        if (document.querySelector('input[data-name="ProductServices_Attachment"]')) {
-          const OptAtt = document.querySelector('[data-name="ProductServices_Attachment"]');
-          const kendoOptAtt = $(OptAtt).data('kendoUpload');
-          kendoOptAtt.bind("upload", function(e) {
-            if (e.files && e.files.length) {
-              // config.dataset.ProductServices_Attachment_Flag = 'Y';
-            }
-          });
-  
-          $('input[data-name="ProductServices_Attachment"]').live('change', function() {
-            if (document.querySelector('.k-upload .k-upload-files .k-file-validation-message')) {
-              mo.fn.modal.show({
-                ctaLabel: hpe.fn.lang('OK', config.locale, config.localizations),
-                title: hpe.fn.lang('ErrorGeneric2', config.locale, config.localizations),
-                content: hpe.fn.lang("FormACR001", config.locale, config.localizations),
-                ctaCallback: function() {
-                  mo.fn.events.closeAll();
-                },
-                contentCallback: function() {
-                  config.dataset.ProductServices_Attachment = null;
-                  $('.k-upload .k-upload-files .k-upload-status .k-icon[title="Remove"]').click();
-                }
-              });
-              // config.dataset.ProductServices_Attachment_Flag = 'N';
-            }
-          });
-        }
+	  console.log('page13');
+	  if (document.querySelector('input[data-name="ProductServices_Attachment"]')) {
+		const OptAtt = document.querySelector('[data-name="ProductServices_Attachment"]');
+		const kendoOptAtt = $(OptAtt).data('kendoUpload');
+		kendoOptAtt.bind("upload", function(e) {
+		  if (e.files && e.files.length) {
+			// config.dataset.ProductServices_Attachment_Flag = 'Y';
+		  }
+		});
+
+		$('input[data-name="ProductServices_Attachment"]').live('change', function() {
+		  if (document.querySelector('.k-upload .k-upload-files .k-file-validation-message')) {
+			mo.fn.modal.show({
+			  ctaLabel: hpe.fn.lang('OK', config.locale, config.localizations),
+			  title: hpe.fn.lang('ErrorGeneric2', config.locale, config.localizations),
+			  content: hpe.fn.lang("FormACR001", config.locale, config.localizations),
+			  ctaCallback: function() {
+				mo.fn.events.closeAll();
+			  },
+			  contentCallback: function() {
+				config.dataset.ProductServices_Attachment = null;
+				$('.k-upload .k-upload-files .k-upload-status .k-icon[title="Remove"]').click();
+			  }
+			});
+			// config.dataset.ProductServices_Attachment_Flag = 'N';
+		  }
+		});
+	  }
 	  const selectedAllEl = document.querySelector("input[type='checkbox'][data-name='Selected_All']");
 	  const changableInputs = document.querySelectorAll('input[data-name*="Count"], input[data-name*="Selected"]');
 	  const individualCheckboxes = document.querySelectorAll("input[type='checkbox'][data-name^='Selected_']:not([data-name='Selected_All'])");
