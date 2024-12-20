@@ -2,7 +2,7 @@
 <script>
   let singleRel = {};
   if ("[SSOData.Email]".indexOf('@hpe.com') < 0){
-	singleRel = JSON.parse(`[SSOData.MultipleCompanyRelationship]`).filter(item => item.businessRelationshipCountryName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryName && item.businessRelationshipCountryCode === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryCode && item.businessRelationship.mdcpPartnerBusinessRelationshipTypeName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).partnerType)[0]
+	singleRel = JSON.parse(String.raw`[SSOData.MultipleCompanyRelationship]`).filter(item => item.businessRelationshipCountryName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryName && item.businessRelationshipCountryCode === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryCode && item.businessRelationship.mdcpPartnerBusinessRelationshipTypeName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).partnerType)[0]
   }
   function getCountryData(countryCode, data) {
 	return data.find(item => item.ISO2 === countryCode);
