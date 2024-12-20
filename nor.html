@@ -1,8 +1,9 @@
 <!-- VERSION ROUTING-->
 <script>
   let singleRel = {};
-  if ("[SSOData.Email]".indexOf('@hpe.com') < 0){
-	singleRel = JSON.parse(String.raw`[SSOData.MultipleCompanyRelationship]`).filter(item => item.businessRelationshipCountryName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryName && item.businessRelationshipCountryCode === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryCode && item.businessRelationship.mdcpPartnerBusinessRelationshipTypeName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).partnerType)[0]
+  if ("[SSOData.Email]".indexOf('@hpe.com') < 0) {
+	const ppAttr = JSON.parse(String.raw`[SSOData.PreferredPartnerAttribute]`);
+	singleRel = JSON.parse(String.raw`[SSOData.MultipleCompanyRelationship]`).filter(item => item.businessRelationshipCountryName === ppAttr.businessRelationshipCountryName && item.businessRelationshipCountryCode === ppAttr.businessRelationshipCountryCode && item.businessRelationship.mdcpPartnerBusinessRelationshipTypeName === ppAttr.partnerType)[0]
   }
   function getCountryData(countryCode, data) {
 	return data.find(item => item.ISO2 === countryCode);
@@ -16002,5 +16003,5 @@
 	  stg: 'https://partner.hpe.com/group/prp/esm/-/link/19601?fid=989&id=nor-qids-stg',
 	},
   };
-  console.log("====\nNOR Pilot 2024-11-30\n====");
+  console.log("====\nNOR Pilot 2024-12-20\n====");
 </script>
