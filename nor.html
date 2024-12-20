@@ -1,8 +1,9 @@
 <!-- VERSION ROUTING-->
 <script>
   let singleRel = {};
-  if ("[SSOData.Email]".indexOf('@hpe.com') < 0){
-	singleRel = JSON.parse(`[SSOData.MultipleCompanyRelationship]`).filter(item => item.businessRelationshipCountryName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryName && item.businessRelationshipCountryCode === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).businessRelationshipCountryCode && item.businessRelationship.mdcpPartnerBusinessRelationshipTypeName === JSON.parse(`[SSOData.PreferredPartnerAttribute]`).partnerType)[0]
+  if ("[SSOData.Email]".indexOf('@hpe.com') < 0) {
+	const ppAttr = JSON.parse(String.raw`[SSOData.PreferredPartnerAttribute]`);
+	singleRel = JSON.parse(String.raw`[SSOData.MultipleCompanyRelationship]`).filter(item => item.businessRelationshipCountryName === ppAttr.businessRelationshipCountryName && item.businessRelationshipCountryCode === ppAttr.businessRelationshipCountryCode && item.businessRelationship.mdcpPartnerBusinessRelationshipTypeName === ppAttr.partnerType)[0]
   }
   function getCountryData(countryCode, data) {
 	return data.find(item => item.ISO2 === countryCode);
@@ -3454,7 +3455,7 @@
 			  required: false,
 			  type: "select",
 			  values: () => multiValues.getValues("SoldTo_PartyId"),
-			  options: () => multiValues.getOptions("SoldTo_PartyId")
+			  options: () => multiValues.getOptions("SoldTo_PartyIdName")
 			},
 			{
 			  filter: () => multiValues.fieldIsVisible(config.dataset, "SoldTo_PartyId"),
@@ -3566,7 +3567,7 @@
 			required: false,
 			type: "select",
 			values: () => multiValues.getValues("SoldTo_PartyId"),
-			options: () => multiValues.getOptions("SoldTo_PartyId")
+			options: () => multiValues.getOptions("SoldTo_PartyIdName")
 		  },
 		   {
 			 filter: () => multiValues.fieldIsVisible(config.dataset, "SoldTo_PartyId"),
@@ -4103,7 +4104,26 @@
 		  //placeholder: "Form104",
 		  validation: ["kpDefault", "minLen|2", "maxLen|10", "noBlanksv2"],
 		  typing: "kpDefault"
-		}],
+		}/* Prepared for the next steps of Multiple Preferences
+		 {
+		   filter: () => multiValues.hasValues("BillTo_PartyId"),
+		   label: "Form086",
+		   data: "BillTo_PartyId_Predefined",
+		   required: false,
+		   type: "select",
+		   values: () => multiValues.getValues("BillTo_PartyId"),
+		   options: () => multiValues.getOptions("BillTo_PartyIdName")
+		 },
+		 {
+		   filter: () => multiValues.fieldIsVisible(config.dataset, "BillTo_PartyId"),
+		   label: "Form086",
+		   data: "BillTo_PartyId",
+		   required: false,
+		   type: "text",
+		   //placeholder: "Form104",
+		   validation: ["kpDefault", "minLen|2", "maxLen|10", "noBlanksv2"],
+		   typing: "kpDefault"
+		 }*/],
 		[{
 		  label: "Form058",
 		  data: "BillTo_CompanyName",
@@ -8481,6 +8501,13 @@
 				delete partyPrefs[key];
 			  });
 			});
+			// Force some Party ID preferences to be arrays
+			Object.keys(prefs).forEach((prefPartyId) => {
+			  const partyPrefs = prefs[prefPartyId];
+			  ["ShipTo_PartyId", "BillTo_PartyId"].filter(key => !!partyPrefs[key]).forEach((key) => {
+				if (!Array.isArray(partyPrefs[key])) partyPrefs[key] = [partyPrefs[key]];
+			  });
+			});
 			global.data.userPreferences = prefs;
 			resolve();
 		  }, (errArg) => {
@@ -11071,53 +11098,37 @@
 	  console.log('page12');
 	},
 	page13: function() {
-        console.log('page13');
-        if (document.querySelector('input[data-name="ProductServices_Attachment"]')) {
-          const OptAtt = document.querySelector('[data-name="ProductServices_Attachment"]');
-          const kendoOptAtt = $(OptAtt).data('kendoUpload');
-          kendoOptAtt.bind("upload", function(e) {
-            if (e.files && e.files.length) {
-              // config.dataset.ProductServices_Attachment_Flag = 'Y';
-            }
-          });
-  
-          $('input[data-name="ProductServices_Attachment"]').live('change', function() {
-            if (document.querySelector('.k-upload .k-upload-files .k-file-validation-message')) {
-              mo.fn.modal.show({
-                ctaLabel: hpe.fn.lang('OK', config.locale, config.localizations),
-                title: hpe.fn.lang('ErrorGeneric2', config.locale, config.localizations),
-                content: hpe.fn.lang("FormACR001", config.locale, config.localizations),
-                ctaCallback: function() {
-                  mo.fn.events.closeAll();
-                },
-                contentCallback: function() {
-                  config.dataset.ProductServices_Attachment = null;
-                  $('.k-upload .k-upload-files .k-upload-status .k-icon[title="Remove"]').click();
-                }
-              });
-              // config.dataset.ProductServices_Attachment_Flag = 'N';
-            }
-          });
-        }
-	  
-	  const changableInputs = document.querySelectorAll('input[data-name*="Count"], input[data-name*="Selected"]');
-	  if (changableInputs.length) {
-		for (let i = 0; i < changableInputs.length; i++) {
-		  changableInputs[i].addEventListener('change', function(e) {
-			const check = nbsf.ev.global(config);
-			if (!check.total.fail) {
-			  quoteHelper.saveProductAndServicesConfig(config);
-			}
-		  });
-		}
-	  }
-	  
-	  if (!config.dataset.ProductServices_Attachment && config.dataset.Config_Quote !== 'Y') {
-		 quoteHelper.onInitProductAndServices(config);
-	//	quoteHelper.onCloneProductAndServices(config, document);
-	  }
+	  console.log('page13');
+	  if (document.querySelector('input[data-name="ProductServices_Attachment"]')) {
+		const OptAtt = document.querySelector('[data-name="ProductServices_Attachment"]');
+		const kendoOptAtt = $(OptAtt).data('kendoUpload');
+		kendoOptAtt.bind("upload", function(e) {
+		  if (e.files && e.files.length) {
+			// config.dataset.ProductServices_Attachment_Flag = 'Y';
+		  }
+		});
 
-	  const selectedAllEl = document.querySelector("input[data-name='Selected_All']");
+		$('input[data-name="ProductServices_Attachment"]').live('change', function() {
+		  if (document.querySelector('.k-upload .k-upload-files .k-file-validation-message')) {
+			mo.fn.modal.show({
+			  ctaLabel: hpe.fn.lang('OK', config.locale, config.localizations),
+			  title: hpe.fn.lang('ErrorGeneric2', config.locale, config.localizations),
+			  content: hpe.fn.lang("FormACR001", config.locale, config.localizations),
+			  ctaCallback: function() {
+				mo.fn.events.closeAll();
+			  },
+			  contentCallback: function() {
+				config.dataset.ProductServices_Attachment = null;
+				$('.k-upload .k-upload-files .k-upload-status .k-icon[title="Remove"]').click();
+			  }
+			});
+			// config.dataset.ProductServices_Attachment_Flag = 'N';
+		  }
+		});
+	  }
+	  const selectedAllEl = document.querySelector("input[type='checkbox'][data-name='Selected_All']");
+	  const changableInputs = document.querySelectorAll('input[data-name*="Count"], input[data-name*="Selected"]');
+	  const individualCheckboxes = document.querySelectorAll("input[type='checkbox'][data-name^='Selected_']:not([data-name='Selected_All'])");
 	  if (selectedAllEl) {
 		if (document.querySelector("input[data-name='ProductServices_Attachment']")) {
 		  selectedAllEl.closest(".fmmcosmin").style.visibility = "hidden";
@@ -11125,16 +11136,34 @@
 		  selectedAllEl.addEventListener("change", (e) => {
 			const selAllChecked = e.target.checked;
 			const paramValue = selAllChecked ? "Y" : null;
-			config.dom.querySelectorAll("input[type='checkbox'][data-name^='Selected_']").forEach((cbEl) => {
+			individualCheckboxes.forEach((cbEl) => {
 			  const paramName = cbEl.getAttribute("data-name");
-			  if (paramName != "Selected_All") {
-				cbEl.checked = selAllChecked;
-				config.dataset[paramName] = paramValue;
-			  }
+			  cbEl.checked = selAllChecked;
+			  config.dataset[paramName] = paramValue;
 			});
 			nbsf.ev.global(config);
 		  });
 		}
+	  }
+
+	  if (changableInputs.length) {
+		for (let i = 0; i < changableInputs.length; i++) {
+		  changableInputs[i].addEventListener('change', function(e) {
+			const checkbox = e.target;
+			const paramName = checkbox.getAttribute("data-name");
+			config.dataset[paramName] = checkbox.checked ? "Y" : null;
+
+			allChecked = Array.from(individualCheckboxes).every(cbEl => cbEl.checked);
+			selectedAllEl.checked = allChecked;
+			config.dataset["Selected_All"] = allChecked ? "Y" : null;
+
+			quoteHelper.saveProductAndServicesConfig(config);
+		  });
+		}
+	  }
+
+	  if (!config.dataset.ProductServices_Attachment && config.dataset.Config_Quote !== 'Y') {
+		quoteHelper.onInitProductAndServices(config);
 	  }
 	},
 	quotePreview: function() {
@@ -15933,6 +15962,7 @@
 		config.addressField.forEach((field) => {
 		  config.dataset[section + "_" + field] = null;
 		  if (rdsExists) config.reviewDataset[section + "_" + field] = null;
+		  $("[data-name='" + section + "_" + field + "']").val("");
 		})
 	  }
 	  nbsf.init(config, config.page);
@@ -16002,5 +16032,5 @@
 	  stg: 'https://partner.hpe.com/group/prp/esm/-/link/19601?fid=989&id=nor-qids-stg',
 	},
   };
-  console.log("====\nNOR Pilot 2024-11-30\n====");
+  console.log("====\nNOR Pilot 2024-12-20\n====");
 </script>
