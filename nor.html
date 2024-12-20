@@ -3455,7 +3455,7 @@
 			  required: false,
 			  type: "select",
 			  values: () => multiValues.getValues("SoldTo_PartyId"),
-			  options: () => multiValues.getOptions("SoldTo_PartyId")
+			  options: () => multiValues.getOptions("SoldTo_PartyIdName")
 			},
 			{
 			  filter: () => multiValues.fieldIsVisible(config.dataset, "SoldTo_PartyId"),
@@ -3567,7 +3567,7 @@
 			required: false,
 			type: "select",
 			values: () => multiValues.getValues("SoldTo_PartyId"),
-			options: () => multiValues.getOptions("SoldTo_PartyId")
+			options: () => multiValues.getOptions("SoldTo_PartyIdName")
 		  },
 		   {
 			 filter: () => multiValues.fieldIsVisible(config.dataset, "SoldTo_PartyId"),
@@ -4104,7 +4104,26 @@
 		  //placeholder: "Form104",
 		  validation: ["kpDefault", "minLen|2", "maxLen|10", "noBlanksv2"],
 		  typing: "kpDefault"
-		}],
+		}/* Prepared for the next steps of Multiple Preferences
+		 {
+		   filter: () => multiValues.hasValues("BillTo_PartyId"),
+		   label: "Form086",
+		   data: "BillTo_PartyId_Predefined",
+		   required: false,
+		   type: "select",
+		   values: () => multiValues.getValues("BillTo_PartyId"),
+		   options: () => multiValues.getOptions("BillTo_PartyIdName")
+		 },
+		 {
+		   filter: () => multiValues.fieldIsVisible(config.dataset, "BillTo_PartyId"),
+		   label: "Form086",
+		   data: "BillTo_PartyId",
+		   required: false,
+		   type: "text",
+		   //placeholder: "Form104",
+		   validation: ["kpDefault", "minLen|2", "maxLen|10", "noBlanksv2"],
+		   typing: "kpDefault"
+		 }*/],
 		[{
 		  label: "Form058",
 		  data: "BillTo_CompanyName",
@@ -8480,6 +8499,13 @@
 				  partyPrefs[newKey].push(partyPrefs[key]);
 				}
 				delete partyPrefs[key];
+			  });
+			});
+			// Force some Party ID preferences to be arrays
+			Object.keys(prefs).forEach((prefPartyId) => {
+			  const partyPrefs = prefs[prefPartyId];
+			  ["ShipTo_PartyId", "BillTo_PartyId"].filter(key => !!partyPrefs[key]).forEach((key) => {
+				if (!Array.isArray(partyPrefs[key])) partyPrefs[key] = [partyPrefs[key]];
 			  });
 			});
 			global.data.userPreferences = prefs;
@@ -15936,6 +15962,7 @@
 		config.addressField.forEach((field) => {
 		  config.dataset[section + "_" + field] = null;
 		  if (rdsExists) config.reviewDataset[section + "_" + field] = null;
+		  $("[data-name='" + section + "_" + field + "']").val("");
 		})
 	  }
 	  nbsf.init(config, config.page);
