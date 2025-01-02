@@ -1,5 +1,6 @@
 <script>
     const hpe = {
+        server: "https://hpe-rfb.it.hpe.com",
         c: {
             e: function(e) {
                 console.error(e);
@@ -135,7 +136,7 @@
                 if (typeof(crud) !== "undefined") hpe.c.w("CRUD is already defined.");
                 else {
                     let script = document.createElement("script");
-                    script.src = 'https://hpe-rfb.it.hpe.com/resources/rs/custom/js/crud.js';
+                    script.src = hpe.server + '/resources/rs/custom/js/crud.js';
                     document.querySelector("body").appendChild(script);
                     hpe.c.i("CRUD JS added to the document");
                 }
@@ -145,7 +146,7 @@
                 if (typeof(ckie) !== "undefined") hpe.c.w("COOKIE is already defined.");
                 else {
                     let script = document.createElement("script");
-                    script.src = 'https://hpe-rfb.it.hpe.com/resources/rs/custom/js/ckie.js';
+                    script.src = hpe.server + '/resources/rs/custom/js/ckie.js';
                     document.querySelector("body").appendChild(script);
                     hpe.c.i("COOKIE JS added to the document");
                 }
@@ -155,7 +156,7 @@
                 if (typeof(mail) !== "undefined") hpe.c.w("MAIL JS is already defined (or the variable is already stored in memory).");
                 else {
                     let script = document.createElement("script");
-                    script.src = 'https://hpe-rfb.it.hpe.com/resources/rs/custom/onb/js/mail.js';
+                    script.src = hpe.server + '/resources/rs/custom/onb/js/mail.js';
                     document.querySelector("body").appendChild(script);
                     hpe.c.i("MAIL JS added to the document");
                 }
@@ -165,7 +166,7 @@
                 if (typeof(mo) !== "undefined") hpe.c.w("Modal & Overlay JS is already defined (or the variable is already stored in memory).");
                 else {
                     let script = document.createElement("script");
-                    script.src = 'https://hpe-rfb.it.hpe.com/resources/rs/custom/js/mo2.js';
+                    script.src = hpe.server + '/resources/rs/custom/js/mo2.js';
                     document.querySelector("body").appendChild(script);
                     hpe.c.i("MOJS 2 added to the document");
                 }
@@ -175,7 +176,7 @@
                 if (typeof(tokn) !== "undefined") hpe.c.w("TOKN JS is already defined (or the variable is already stored in memory).");
                 else {
                     let script = document.createElement("script");
-                    script.src = 'https://hpe-rfb.it.hpe.com/resources/rs/custom/js/tokn.js';
+                    script.src = hpe.server + '/resources/rs/custom/js/tokn.js';
                     document.querySelector("body").appendChild(script);
                     hpe.c.i("TOKN JS added to the document");
                 }
@@ -195,7 +196,7 @@
                 if (typeof(lov) !== "undefined") hpe.c.w("LOV JS is already defined (or the variable is already stored in memory).");
                 else {
                     let script = document.createElement("script");
-                    script.src = 'https://hpe-rfb.it.hpe.com/resources/rs/custom/js/lov.js';
+                    script.src = hpe.server + '/resources/rs/custom/js/lov.js';
                     document.querySelector("body").appendChild(script);
                     hpe.c.i("LOV JS added to the document");
                 }
@@ -205,7 +206,7 @@
                 if (typeof(lov) !== "undefined") hpe.c.w("Profile JS is already defined (or the variable is already stored in memory).");
                 else {
                     let script = document.createElement("script");
-                    script.src = 'https://hpe-rfb.it.hpe.com/resources/rs/custom/js/profile.js';
+                    script.src = hpe.server + '/resources/rs/custom/js/profile.js';
                     document.querySelector("body").appendChild(script);
                     hpe.c.i("Profile JS added to the document");
                 }
@@ -247,7 +248,7 @@
                         else return this.responseText;
                     }
                 });
-                xhr.open("GET", "https://hpe-rfb.it.hpe.com/resources/rs/custom/onb/timestamp.php");
+                xhr.open("GET", hpe.server + "/resources/rs/custom/onb/timestamp.php");
                 xhr.send();
             }
         },
@@ -621,7 +622,7 @@
 					  }
 					}
 				  });
-				  xhr.open("GET", "https://hpe-rfb.it.hpe.com/resources/rs/custom/partyrequest.php?type=" + type + "&id=" + id);
+				  xhr.open("GET", hpe.server + "/resources/rs/custom/partyrequest.php?type=" + type + "&id=" + id);
 				  xhr.send(response);
 				});
 			  }
@@ -659,7 +660,7 @@
 				}
 			  }
 			});
-			xhr.open("POST", "https://hpe-rfb.it.hpe.com/resources/rs/custom/php/dxp/userSearch.php");
+			xhr.open("POST", hpe.server + "/resources/rs/custom/php/dxp/userSearch.php");
 			xhr.setRequestHeader("Content-Type", "text/plain");
 			xhr.send(payload);
 		  },
@@ -703,11 +704,11 @@
 
                 // set default request configuration
                 config.method = 'POST';
-                config.uri = 'https://hpe-rfb.it.hpe.com/form/data-set-provider/v2/' + config.form + '/' + config.dataset + '/kendo/data/search';
+                config.uri = hpe.server + '/form/data-set-provider/v2/' + config.form + '/' + config.dataset + '/kendo/data/search';
 
                 if (config.payload) {
                     if (typeof(config.payload.data) === "object") {
-                        config.uri = 'https://hpe-rfb.it.hpe.com/form/data-set-provider/v2/' + config.form + '/' + config.dataset + '/kendo/data';
+                        config.uri = hpe.server + '/form/data-set-provider/v2/' + config.form + '/' + config.dataset + '/kendo/data';
                         payload.append('models', JSON.stringify([config.payload.data]));
                         if (config.payload.data.EntryId) {
                             config.method = 'PUT';

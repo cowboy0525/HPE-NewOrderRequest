@@ -22,7 +22,7 @@
 	getLocationAddress: function(locationId) {
 	  if (locationId in locationApi.partyCache) return locationApi.partyCache[locationId];
 
-	  const loc = fetch(`https://hpe-rfb.itcs.hpe.com/resources/rs/custom/php/nor/location/location-prod.php?id=${locationId}`, {
+	  const loc = fetch(appSettings.locationUrl(locationId), {
 		headers: {
 		  "Content-Type": "application/json"
 		}
@@ -240,7 +240,7 @@
 	}
 	xhr.open(
 	  'GET',
-	  `https://hpe-rfb.itcs.hpe.com/resources/rs/custom/php/nor/location/location-prod.php?id=${currentVal}`
+	  appSettings.locationUrl(currentVal)
 	);
 	xhr.timeout = 80000;
 	const errorHandler = function() {
@@ -1009,7 +1009,7 @@
 			return callback(JSON.parse(cachedICM.JSON));
 		  }
 		});
-		xhr.open("POST", "https://hpe-rfb.it.hpe.com/resources/rs/custom/php/xaas/search.php");
+		xhr.open("POST", appSettings.xaasSearchUrl);
 		xhr.setRequestHeader("Content-Type", "application/json");
 		xhr.send(JSON.stringify(payload));
 	  });
@@ -1083,7 +1083,7 @@
 			return callback(sourceICM);
 		}
 	  });
-	  xhr.open("POST", "https://hpe-rfb.it.hpe.com/resources/rs/custom/php/xaas/search.php");
+	  xhr.open("POST", appSettings.xaasSearchUrl);
 	  xhr.setRequestHeader("Content-Type", "application/json");
 	  xhr.send(JSON.stringify(payload));
 	},
@@ -1099,7 +1099,7 @@
 		  return callback(this.responseText);
 		}
 	  });
-	  xhr.open("GET", "https://hpe-rfb.it.hpe.com/resources/rs/custom/onb/timestamp.php");
+	  xhr.open("GET", appSettings.timestampUrl);
 	  xhr.send(response);
 	}
   }
@@ -8814,7 +8814,7 @@
 			type: "rfb-v2",
 			transport: {
 			  read: {
-				url: "https://hpe-rfb.it.hpe.com/form/data-set-provider/v2/989/NOR_EMDM_PartyData/kendo/data/search",
+				url: appSettings.server + "/form/data-set-provider/v2/989/NOR_EMDM_PartyData/kendo/data/search",
 				type: 'POST'
 			  },
 			},
@@ -9896,7 +9896,7 @@
 		type: "rfb-v2",
 		transport: {
 		  read: {
-			url: "https://hpe-rfb.it.hpe.com/form/data-set-provider/v2/1476/LanguagesList/kendo/data/search",
+			url: appSettings.server + "/form/data-set-provider/v2/1476/LanguagesList/kendo/data/search",
 			type: 'POST'
 		  },
 		},
@@ -11339,7 +11339,7 @@
 	  }
 	  xhr.open(
 		'GET',
-		`https://hpe-rfb.it.hpe.com/resources/rs/custom/php/qids/readquote.php?qid=${qid}`
+		appSettings.readQuoteUrl(qid)
 	  );
 	  // for testing: 
 	  // xhr.timeout = qid === 'NI01062833-01' ? 1000 : 10000;
